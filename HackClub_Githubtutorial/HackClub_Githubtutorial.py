@@ -21,6 +21,15 @@ class State(rx.State):
     def toggle_sidebar(self):
         self.sidebar_status = not self.sidebar_status
 
+    @rx.var
+    def sync_page(self) -> str:
+        try:
+            self.page_on = self.pages.index(self.router.page.path)
+            return self.router.page.path
+        except ValueError:
+            self.page_on = 0
+            return "/"
+
     def next_page(self):
         self.page_on = min(self.page_on + 1, len(self.pages) - 1)
         return rx.redirect(self.pages[self.page_on])
@@ -28,9 +37,6 @@ class State(rx.State):
     def prev_page(self):
         self.page_on = max(self.page_on - 1, 0)
         return rx.redirect(self.pages[self.page_on])
-    
-    def sync_page(self):
-        self.page_on = self.pages[self.pages.index(rx.router.get_path())]
 
 def nav_controls():
      return rx.flex(
@@ -44,7 +50,6 @@ def wrapper(*content: rx.Component):
 def index() -> rx.Component:
     # Welcome Page (Index)
     return rx.container(
-        rx.effect(State.sync_page),
         rx.color_mode.button(position="top-right"),
         rx.button("-", on_click=State.toggle_sidebar),
         rx.vstack(
@@ -77,7 +82,6 @@ def index() -> rx.Component:
 
 def git_and_github_for_beginners():
     return rx.container(
-        rx.effect(State.sync_page),
         rx.color_mode.button(position="top-right"),
         rx.vstack(
             rx.image("/dinos/dino-emergency-meeting.png"),
@@ -89,7 +93,6 @@ def git_and_github_for_beginners():
 
 def installing_git():
     return rx.container(
-        rx.effect(State.sync_page),
         rx.color_mode.button(position="top-right"),
         rx.vstack(),
         nav_controls(),
